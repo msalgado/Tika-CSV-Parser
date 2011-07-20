@@ -1,0 +1,43 @@
+/**
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Copyright 2011 Junar SpA.
+**/
+
+Description
+------------
+ A simple CSV parser implementation for Tika to convert a CSV 
+ on a basic HTML table using opencsv (http://opencsv.sourceforge.net). 
+ 
+ By default use:
+  - Value separator: ,
+  - Value delimiter: " 
+
+Use
+----
+- Add to file tika-parsers/src/main/resources/META-INF/services/org.apache.tika.parser.Parser the following line:
+      org.apache.tika.parser.csv.CSVTikaParser
+	
+- Add the package org.apache.tika.parser.csv to your local source of apache-tika
+
+- Add opencsv to maven dependencies to tika-parsers/pom.xml
+      <dependency>
+      	<groupId>net.sf.opencsv</groupId>
+      	<artifactId>opencsv</artifactId>
+      	<version>2.0</version>
+      </dependency>
+
+- Compile and use it!

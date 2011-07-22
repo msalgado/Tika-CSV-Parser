@@ -22,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -68,7 +69,8 @@ public class CSVTikaParser implements Parser {
         fXHTML = new XHTMLContentHandler(handler, metadata);
         
         BufferedReader lBufferedReader = new BufferedReader(new InputStreamReader(stream));
-        CSVReader lReader = new CSVReader(lBufferedReader);
+
+        CSVReader lReader = new CSVReader(lBufferedReader, detectSeparators(lBufferedReader));
         List<String[]> lCSVEntries = lReader.readAll();
         
         getTable(lCSVEntries);
@@ -79,7 +81,35 @@ public class CSVTikaParser implements Parser {
         lBufferedReader.close();
     }
     
-    public void getTable(List<String[]> pCSVContent) throws SAXException 
+    private char detectSeparators(BufferedReader pBuffered) throws IOException {
+        int lMaxValue = 0;
+        char lCharMax = ','; 
+        pBuffered.mark(2048);
+        
+        ArrayList<Separators> lSeparators = new ArrayList<Separators>();        
+        lSeparators.add(new Separators(','));
+        lSeparators.add(new Separators(';'));
+        lSeparators.add(new Separators('\t'));
+        
+        Iterator<Separators> lIterator = lSeparators.iterator();
+        while (lIterator.hasNext()) {
+            Separators lSeparator = lIterator.next();
+            CSVReader lReader = new CSVReader(pBuffered, lSeparator.getSeparator());
+            String[] lLine;
+            lLine = lReader.readNext();
+            lSeparator.setCount(lLine.length);
+            
+            if (lSeparator.getCount() > lMaxValue) {
+                lMaxValue = lSeparator.getCount();
+                lCharMax = lSeparator.getSeparator();
+            }
+            pBuffered.reset();
+        }
+        
+        return lCharMax;
+    }
+    
+    private void getTable(List<String[]> pCSVContent) throws SAXException 
     {
         Iterator<String[]> lIterator = pCSVContent.iterator();
         
@@ -94,7 +124,7 @@ public class CSVTikaParser implements Parser {
         fXHTML.endDocument();
     }
     
-    public void getRows(String[] pRow) throws SAXException
+    private void getRows(String[] pRow) throws SAXException
     {
         for (String lRowValue: pRow) {
             fXHTML.startElement("td");
@@ -111,4 +141,28 @@ public class CSVTikaParser implements Parser {
     throws IOException, SAXException, TikaException {
         parse(stream, handler, metadata, new ParseContext());
     }
+    
+    
+    private class Separators {
+        private char fSeparatorChar;
+        private int  fFieldCount;
+        
+        public Separators(char pSeparator) {
+            fSeparatorChar = pSeparator;
+        }
+        public void setSeparator(char pSeparator) {
+            fSeparatorChar = pSeparator;
+        }
+        
+        public void setCount(int pCount) {
+            fFieldCount = pCount;
+        }
+        public char getSeparator() {
+            return fSeparatorChar;
+        }
+        public int getCount() {
+            return fFieldCount;
+        }        
+    }
+
 }
